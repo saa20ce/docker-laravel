@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./public:/var/www/html
+    depends_on:
+      - php
+
+  php:
+    image: php:8.3-fpm
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - mysql
+      - postgres
+      - redis
+      - memcached
+
+  node:
+    image: node:20
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: rootpassword
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  phpredisadmin:
+    image: erikdubbelboer/phpredisadmin
+    ports:
+      - "8081:80"
+    depends_on:
+      - redis
+
+  memcached:
+    image: memcached:latest
+    ports:
+      - "11211:11211"
+
+volumes:
+  db_data:
+  pg_data:
+
+networks:
+  app-network:
+    driver: bridge
